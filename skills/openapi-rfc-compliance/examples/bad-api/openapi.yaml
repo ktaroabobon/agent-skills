@@ -1,0 +1,210 @@
+# 自己テスト用フィクスチャ。各領域に意図的な違反を仕込んである。
+# 検出箇所を示すヒントコメントは意図的に置いていない(コメントを読むだけで正解できないようにするため)。
+# 期待される検出結果と誤検知トラップの一覧は ../expected-findings.md を参照。
+# 実運用の API 定義として参考にしないこと。
+openapi: 3.1.0
+info:
+  title: Sample Order API
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+
+security:
+  - oauth2: []
+
+paths:
+  /orders:
+    get:
+      operationId: listOrders
+      summary: 注文一覧を取得する
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Order' }
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '429':
+          description: Too Many Requests
+          headers:
+            Retry-After:
+              schema: { type: string }
+              example: "30s"
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+    post:
+      operationId: createOrder
+      summary: 注文を作成する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: 注文を 1 件取得する
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+              example:
+                type: https://example.com/errors/order-not-found
+                title: Order not found
+                status: 400
+                detail: 該当する注文がありません。
+    delete:
+      operationId: getOrder
+      summary: 注文を削除する
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted: { type: boolean }
+
+  /legacy/orders:
+    get:
+      operationId: listLegacyOrders
+      summary: 旧形式の注文一覧
+      deprecated: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Order' }
+
+  /payments:
+    post:
+      operationId: createPayment
+      summary: 決済を実行する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, currency]
+              properties:
+                amount:   { type: integer }
+                currency: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+
+  /healthz:
+    get:
+      operationId: health
+      summary: ヘルスチェック
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema: { type: string }
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://api.example.com/oauth/token
+          scopes: {}
+
+  schemas:
+    Order:
+      type: object
+      required: [id, status]
+      properties:
+        id:     { type: string }
+        status: { type: string, enum: [pending, paid, shipped] }
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-08-07 12:34:56"
+        shipDate:
+          type: string
+          format: date
+          example: "2026-08-10"
+        note:
+          type: string
+          nullable: true
+
+    OrderInput:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [sku, quantity]
+            properties:
+              sku:      { type: string }
+              quantity: { type: integer, minimum: 1 }
+
+    Payment:
+      type: object
+      required: [id, amount, currency]
+      properties:
+        id:       { type: string }
+        amount:   { type: integer }
+        currency: { type: string }
+
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:     { type: string, format: uri }
+        title:    { type: string }
+        status:   { type: integer }
+        detail:   { type: string }
+        instance: { type: string, format: uri }
