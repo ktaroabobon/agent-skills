@@ -1,7 +1,7 @@
 ---
 name: agents-onboarding
 description: 任意のリポジトリに AI エージェント向けの開発基盤(rules / debug・review・verify スキル / PreToolUse hooks / AGENTS.md 配線)を一式整備するオンボーディング。「このリポジトリをオンボーディングして」「AI ルールを整備して」「agents セットアップ」「新しいリポジトリに rules を作って」時に使用。対象リポジトリを分析し、テンプレートをそのリポジトリ流に具体化する。
-argument-hint: [target-repo-path]
+argument-hint: "[target-repo-path]"
 license: MIT
 ---
 
