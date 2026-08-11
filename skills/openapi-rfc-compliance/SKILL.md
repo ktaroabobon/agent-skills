@@ -1,7 +1,7 @@
 ---
 name: openapi-rfc-compliance
 description: リポジトリ内の OpenAPI 定義と Web API 実装が RFC / 業界デファクトに準拠しているかを 10 領域で検査し、修正ポイントを重大度つきで洗い出す。「API が RFC に準拠しているかチェック」「OpenAPI をレビュー」「Web API 設計を監査して」「エラーレスポンスは RFC 9457 準拠か」「この API 設計は今どきか」時に使用。領域ごとにサブエージェントへ並列ディスパッチし、証拠(file:line)つきレポートを生成する。修正は行わない。
-argument-hint: [target-path] [--areas a,b,c] [--spec-only] [--out <report-path>]
+argument-hint: "[target-path] [--areas a,b,c] [--spec-only] [--out <report-path>]"
 license: MIT
 ---
 
