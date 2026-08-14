@@ -4,6 +4,19 @@
 
 ## Skills
 
+### 日々のワークフロー
+
+| skill | 内容 |
+|-------|------|
+| [`commit`](skills/commit/SKILL.md) | リポジトリのチェックコマンドを通してから、意味のある塊ごとに日本語メッセージで commit する。push も PR 作成もしない |
+| [`commit2push`](skills/commit2push/SKILL.md) | commit したうえで remote に push し、リモート CI の結果まで見届ける |
+| [`commit2pr`](skills/commit2pr/SKILL.md) | commit → push → PR 作成/更新。PR テンプレートを探して日本語で本文を書く。既存 PR があれば新規作成しない |
+| [`create-issue`](skills/create-issue/SKILL.md) | 課題・原因・解決策・作業ブランチを構造化した Issue を起票する。既存ラベルから選び、`--project` 指定時のみ Projects 紐付けと Estimate 設定まで行う |
+| [`pr-request-changes`](skills/pr-request-changes/SKILL.md) | 複数の修正指摘を `path:line` に配置し、1 つの REQUEST_CHANGES review として投稿する。単発 inline comment では `reviewDecision` が変わらない問題を回避する |
+| [`rules-review`](skills/rules-review/SKILL.md) | 変更差分をリポジトリの rules に照らし、ルール違反だけを重大度つきで検出する。基準を自動探索するのでオンボーディング前のリポジトリでも動く |
+
+### リポジトリ整備・監査
+
 | skill | 内容 |
 |-------|------|
 | [`agents-onboarding`](skills/agents-onboarding/SKILL.md) | 任意のリポジトリに AI エージェント向けの開発基盤(rules / debug・review・verify スキル / PreToolUse hooks / AGENTS.md 配線)を一式整備するオンボーディング |
@@ -14,17 +27,58 @@
 
 ```bash
 # Claude Code(user scope: 全リポジトリで使える)
-gh skill install ktaroabobon/agent-skills agents-onboarding --agent claude-code --scope user
-gh skill install ktaroabobon/agent-skills openapi-rfc-compliance --agent claude-code --scope user
-gh skill install ktaroabobon/agent-skills skill-creator --agent claude-code --scope user
+for s in commit commit2push commit2pr create-issue pr-request-changes rules-review \
+         agents-onboarding openapi-rfc-compliance skill-creator; do
+  gh skill install ktaroabobon/agent-skills "$s" --agent claude-code --scope user
+done
 
 # Codex
-gh skill install ktaroabobon/agent-skills agents-onboarding --agent codex --scope user
-gh skill install ktaroabobon/agent-skills openapi-rfc-compliance --agent codex --scope user
-gh skill install ktaroabobon/agent-skills skill-creator --agent codex --scope user
+for s in commit commit2push commit2pr create-issue pr-request-changes rules-review \
+         agents-onboarding openapi-rfc-compliance skill-creator; do
+  gh skill install ktaroabobon/agent-skills "$s" --agent codex --scope user
+done
 ```
 
-特定リポジトリだけで使うなら `--scope project`(デフォルト)。
+個別に入れるなら `gh skill install ktaroabobon/agent-skills <name> --agent claude-code --scope user`。特定リポジトリだけで使うなら `--scope project`(デフォルト)。
+
+`commit` / `commit2push` / `commit2pr` は**それぞれ単独で動く**ように書いてある。3 つとも入れる前提にはしていない。
+
+## ワークフロー系スキルの設計方針
+
+日常的に何百回も走るスキルなので、事故の止め方に寄せてある。
+
+### 1. 副作用のあるものはユーザーが打ったときだけ動く
+
+`commit` / `commit2push` / `commit2pr` は `disable-model-invocation: true` を付けている。commit・push・PR 作成は取り消しに手間がかかるか、他人に通知が飛ぶ。「コードが良さそうなので commit しておきました」を構造的に防ぐ。
+
+`create-issue` / `pr-request-changes` は自然言語で呼び出せるほうが実用的なので model 起動を残し、代わりに**投稿前の承認ゲートを必須**にしている(内容を全文提示して `yes` を得るまで実行しない)。
+
+### 2. 本文に書いた禁止事項は hook で機械的に止める
+
+指示文は守られないことがあるが、PreToolUse hook の `exit 2` は必ず効く。
+
+| hook | 止めるもの | 理由 |
+|------|-----------|------|
+| `commit*/hooks/no-ai-attribution.sh` | `Co-Authored-By: Claude` trailer、`🤖 Generated with ...`、`noreply@anthropic.com` | 署名がコミット履歴と PR 本文に残り続ける。`-F` / `--body-file` が指すファイルの中身も見る |
+| `create-issue/hooks/no-new-label.sh` | `gh label create` / `gh api` の POST `/labels` | ラベル体系は運用者が決めるもの。適切なラベルが無いときに勝手に増やさせない |
+| `pr-request-changes/hooks/no-single-comment.sh` | `gh api` の POST `/pulls/{n}/comments` | 単発 inline comment は何本投げても `reviewDecision` を `CHANGES_REQUESTED` にしない。指摘は見えるのにマージがブロックされない失敗を防ぐ |
+
+いずれも**署名やエンドポイントの形だけを見る**。ツール名に言及した正当なコミットメッセージなどを巻き添えにしない粒度にしてある。hook は Claude Code でのみ効くので、Codex 向けには同じ内容を本文の指示としても書いている。
+
+### 3. 判定系は書き込みツールを持たない
+
+`rules-review` は `disallowed-tools: Write Edit NotebookEdit`。判定と実装を同じターンでやると「指摘して、ついでに直して、直した結果を自分で承認する」が起きる。
+
+### `rules-review` と `agents-onboarding` の関係
+
+同名のスキルが 2 つある。役割が違う。
+
+| | 配置 | 基準 |
+|---|------|------|
+| このリポジトリの `rules-review` | user scope(全リポジトリ) | `.agents/rules/` → `.claude/rules/` → `AGENTS.md` の順に自動探索。無ければ「明文化されたルールなし」と報告し、セキュリティと生成物の手編集だけ見る |
+| `agents-onboarding` が生成する `rules-review` | 対象リポジトリ内 | そのリポジトリの rules に合わせて観点を具体化済み |
+
+オンボーディング済みのリポジトリでは後者が、それ以外では前者が働く。出力形式は揃えてある。
 
 ## agents-onboarding が生成するもの
 
