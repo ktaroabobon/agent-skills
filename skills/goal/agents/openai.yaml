@@ -1,0 +1,6 @@
+interface:
+  display_name: "Goal"
+  short_description: "目標を達成して検証するまで自律的に回す"
+  default_prompt: "Use $goal to work on the following goal until it is achieved and verified: <goal>"
+policy:
+  allow_implicit_invocation: false
