@@ -19,7 +19,8 @@ skills/<skill-name>/
 ├── scripts/          # 任意: 実行するコード
 ├── assets/           # 任意: 出力に使う素材
 ├── templates/        # 任意: 生成先リポジトリに展開する雛形(agents-onboarding 方式)
-└── examples/         # 任意: 自己テスト用の fixture
+├── examples/         # 任意: 自己テスト用の fixture
+└── agents/openai.yaml  # 任意: Codex の UI メタデータと自動起動の抑止(→ capabilities.md)
 ```
 
 - ディレクトリ名 = `name` frontmatter = 起動コマンド。**3 つを一致させる**(`validate_skill.py` が検査する)

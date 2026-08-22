@@ -272,14 +272,54 @@ def check_files(rep: Report, skill: Path) -> None:
             rep.warn(f"scripts/{script.name} に実行権限が無い(chmod +x)")
 
 
+OPENAI_YAML_KEYS = {"interface", "dependencies", "policy"}
+
+
+def check_openai_yaml(rep: Report, skill: Path, fm: dict | None) -> None:
+    """Codex が読む agents/openai.yaml。Claude Code は無視するが、Codex 側の自動起動抑止はここでしか書けない。"""
+    path = skill / "agents" / "openai.yaml"
+    dmi = bool(fm and fm.get("disable-model-invocation") is True)
+    if not path.exists():
+        if dmi:
+            rep.warn(
+                "disable-model-invocation: true だが agents/openai.yaml が無い。"
+                "Codex では自動起動される(policy.allow_implicit_invocation: false で抑止できる)"
+            )
+        return
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as e:
+        rep.error(f"agents/openai.yaml の YAML パースに失敗: {e}")
+        return
+    if not isinstance(data, dict):
+        rep.error("agents/openai.yaml がマッピングになっていない")
+        return
+    unknown = set(data) - OPENAI_YAML_KEYS
+    if unknown:
+        rep.warn(f"agents/openai.yaml 未知のトップレベルキー: {sorted(unknown)}(使えるのは {sorted(OPENAI_YAML_KEYS)})")
+    iface = data.get("interface") or {}
+    name = fm.get("name") if fm else None
+    prompt = iface.get("default_prompt") if isinstance(iface, dict) else None
+    if isinstance(prompt, str) and name and f"${name}" not in prompt:
+        rep.warn(f"agents/openai.yaml interface.default_prompt に `${name}` が含まれていない(Codex の呼び出し構文)")
+    policy = data.get("policy") or {}
+    implicit = policy.get("allow_implicit_invocation", True) if isinstance(policy, dict) else True
+    if dmi and implicit is not False:
+        rep.warn(
+            "disable-model-invocation: true だが agents/openai.yaml の policy.allow_implicit_invocation が false でない"
+            "(Codex では自動起動される)"
+        )
+
+
 def validate(skill: Path, target: str) -> Report:
     rep = Report(skill)
     skill_md = skill / "SKILL.md"
     if not skill_md.exists():
         rep.error("SKILL.md が無い")
         return rep
-    check_frontmatter(rep, skill_md, target)
+    fm = check_frontmatter(rep, skill_md, target)
     check_files(rep, skill)
+    check_openai_yaml(rep, skill, fm)
     return rep
 
 

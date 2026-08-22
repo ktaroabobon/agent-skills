@@ -73,6 +73,7 @@ Step 1 の具体例それぞれについて「ゼロから実行するとした�
 | `references/` | 詳細資料。SKILL.md が 500 行に近づいた | | |
 | `assets/` / `templates/` | 出力に使う素材 | | |
 | `examples/` + 期待結果 | 検出漏れ・偽陽性が問題になる | | |
+| `agents/openai.yaml` | Codex の一覧に表示名・既定プロンプトを出したい / `disable-model-invocation` を Codex でも効かせたい | | |
 
 判断材料は [capabilities.md](references/capabilities.md)、hook を使うなら [hooks.md](references/hooks.md)。
 
