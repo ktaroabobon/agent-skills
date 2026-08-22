@@ -1,0 +1,50 @@
+# Codex の execpolicy ルール(Starlark)。コマンド単位で allow / prompt / forbidden を決める。
+#
+# - prefix_rule は「引数列の先頭一致」。フラグが後ろに付く形(git push origin main --force)は
+#   ここでは捕まえられないので、.agents/hooks/guard-commands.sh が補完する
+# - 複数のルールに当たったときは最も厳しい判定が勝つ(forbidden > prompt > allow)
+# - 読み込まれるのは、このプロジェクトの .codex/ 層が trusted のときだけ
+# - match / not_match はロード時に検証される自己テスト。変更したら次で確認する:
+#     codex execpolicy check --pretty --rules .codex/rules/guard.rules -- git push --force origin main
+#
+# onboarding: Phase 2 でユーザーに確認した禁止操作に合わせて増減する。
+
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "forbidden",
+    justification = "force push は禁止(AGENTS.md Prohibited Actions)。必要なら --force-with-lease をユーザーに提案する",
+    match = ["git push --force origin main", "git push --force"],
+    not_match = ["git push --force-with-lease origin main", "git push origin main"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "-f"],
+    decision = "forbidden",
+    justification = "force push は禁止(AGENTS.md Prohibited Actions)",
+    match = ["git push -f origin main"],
+    not_match = ["git push origin main"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "prompt",
+    justification = "作業ツリーを破壊する。ユーザー確認必須(AGENTS.md Prohibited Actions)",
+    match = ["git reset --hard HEAD~1", "git reset --hard"],
+    not_match = ["git reset --soft HEAD~1", "git reset HEAD file.txt"],
+)
+
+prefix_rule(
+    pattern = ["git", "clean", ["-f", "-fd", "-fdx", "-df", "-xdf", "-ffdx"]],
+    decision = "prompt",
+    justification = "未追跡ファイルを消す。ユーザー確認必須",
+    match = ["git clean -fd", "git clean -fdx"],
+    not_match = ["git clean -n"],
+)
+
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr", "-r", "-R", "-Rf", "-fR"]],
+    decision = "prompt",
+    justification = "再帰削除はユーザー確認必須",
+    match = ["rm -rf build", "rm -r tmp"],
+    not_match = ["rm file.txt"],
+)

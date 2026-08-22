@@ -28,7 +28,7 @@ def skill_md(name: str, kinds: set[str]) -> str:
         'argument-hint: "[TODO]"',
     ]
     if "scripts" in kinds:
-        fm.append("allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/run.sh *)")
+        fm.append("allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/run.sh *)")
     if "hooks" in kinds:
         fm += [
             "hooks:",
@@ -36,7 +36,7 @@ def skill_md(name: str, kinds: set[str]) -> str:
             '    - matcher: "Edit|Write"',
             "      hooks:",
             "        - type: command",
-            '          command: "${CLAUDE_SKILL_DIR}/hooks/guard.sh"',
+            '          command: "bash ${CLAUDE_SKILL_DIR}/hooks/guard.sh"',
             "          timeout: 10",
         ]
     fm += ["license: MIT", "---", ""]
@@ -74,7 +74,7 @@ def skill_md(name: str, kinds: set[str]) -> str:
             "決定的な処理は同梱スクリプトに任せる(毎回書き直さない):",
             "",
             "```bash",
-            "${CLAUDE_SKILL_DIR}/scripts/run.sh <引数>",
+            "bash ${CLAUDE_SKILL_DIR}/scripts/run.sh <引数>",
             "```",
             "",
             "`allowed-tools` に同じパスを書いてあるので許可プロンプトは出ない。",
@@ -148,7 +148,7 @@ exit 0
 
 RUN_SH = """#!/bin/bash
 # TODO: 毎回書き直していた処理をここに固定する。
-# スキル本文からは ${CLAUDE_SKILL_DIR}/scripts/run.sh で呼ぶ(cwd に依存しない)。
+# スキル本文からは bash ${CLAUDE_SKILL_DIR}/scripts/run.sh で呼ぶ(cwd に依存しない。gh skill install は実行権限を落とす)。
 set -euo pipefail
 
 if [ $# -lt 1 ]; then

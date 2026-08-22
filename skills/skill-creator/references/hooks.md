@@ -8,6 +8,7 @@
 - [hook の 5 種類](#hook-の-5-種類)
 - [レシピ集](#レシピ集)
 - [hook の検証](#hook-の検証)
+- [Codex で使うとき](#codex-で使うとき)
 - [落とし穴](#落とし穴)
 
 ## なぜ hook を使うか
@@ -47,13 +48,13 @@ hooks:
       hooks:
         - type: command
           if: "Bash(rm *)"
-          command: "${CLAUDE_SKILL_DIR}/hooks/block-destructive.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/block-destructive.sh"
           timeout: 10
   PostToolUse:
     - matcher: "Edit|Write"
       hooks:
         - type: command
-          command: "${CLAUDE_SKILL_DIR}/hooks/format-and-check.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/format-and-check.sh"
 ---
 ```
 
@@ -319,6 +320,29 @@ echo '{"tool_input":{"command":"git push --force"}}' | bash hooks/guard.sh | jq 
 ```
 
 配線されているかは `/hooks` で確認できる(イベント・matcher・ハンドラとその出所が一覧できる)。デバッグは `CLAUDE_CODE_DEBUG=1`。
+
+## Codex で使うとき
+
+Codex にも hook はあり、**契約は Claude Code と同じ**: stdin に JSON(`tool_name` / `tool_input` / `tool_use_id` / `cwd` / `hook_event_name`)、`exit 2` + stderr でブロック、または stdout の JSON で `hookSpecificOutput.permissionDecision: "deny"`。だから hook スクリプトは 1 本で両方に効く。違うのは配線と、ファイル編集の形:
+
+| | Claude Code | Codex |
+|---|---|---|
+| 配線 | `settings.json` / スキル frontmatter の `hooks` | `~/.codex/hooks.json` か `config.toml` の `[hooks]`(user)、`.codex/hooks.json`(project)。**frontmatter の `hooks` は効かない** |
+| project hook が効く条件 | — | そのプロジェクトが trusted で、かつ `/hooks` で hook を確認して信頼済み(ハッシュで記録。変更すると再確認) |
+| ファイル編集の tool | `Edit` / `Write`、`tool_input.file_path` | `apply_patch`、**`tool_input.command` にパッチ本文**(`*** Update File: <path>` / `*** Add File:` / `*** Delete File:` / `*** Move to:` 行からパスを拾う)。matcher は `Edit|Write` でも `apply_patch` に当たる |
+| handler の種類 | command / prompt / agent / http / mcp_tool | `command` のみ(`prompt` / `agent` は読まれるが実行されない) |
+| スクリプトのパス | `${CLAUDE_PROJECT_DIR}` | `"$(git rev-parse --show-toplevel)/..."` を推奨(サブディレクトリから起動されても安定) |
+
+```json
+{ "hooks": { "PreToolUse": [
+  { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": "bash \"$(git rev-parse --show-toplevel)/.agents/hooks/protect-generated-files.sh\"", "timeout": 10 } ] },
+  { "matcher": "Bash",       "hooks": [ { "type": "command", "command": "bash \"$(git rev-parse --show-toplevel)/.agents/hooks/guard-commands.sh\"",          "timeout": 10 } ] }
+] } }
+```
+
+両対応の hook スクリプトは `agents-onboarding/templates/hooks/` にある(`file_path` と apply_patch の両方からパスを取る)。
+
+Codex にはもう 1 つ、hook とは別の機械的な層 **execpolicy** がある。`.codex/rules/*.rules`(project、trusted 時のみ)/ `~/.codex/rules/*.rules`(user)に Starlark で `prefix_rule(pattern=[...], decision="allow|prompt|forbidden")` を書くと、コマンド実行前に判定される。**引数列の先頭一致しかできない**ので、`git push origin main --force` のようにフラグが後ろに付く形は捕まえられない — そこは hook で補う。`codex execpolicy check --rules <file> -- <cmd>` で判定を確認でき、`match` / `not_match` に書いた例はロード時に検証される。
 
 ## 落とし穴
 

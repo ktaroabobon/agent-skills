@@ -76,10 +76,12 @@ npm --version
 ---
 name: render-chart
 description: ...
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/render.sh *)
+allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/render.sh *)
 ---
-`${CLAUDE_SKILL_DIR}/scripts/render.sh <input> <output>` を実行する。
+`bash ${CLAUDE_SKILL_DIR}/scripts/render.sh <input> <output>` を実行する。
 ```
+
+**同梱スクリプトと hook は必ず `bash` / `python3` 経由で起動する。** `gh skill install` はファイルの実行権限を保存しない(git では 100755 でも、インストール先では 644 になる。2026-08 実測)。`${CLAUDE_SKILL_DIR}/scripts/x.sh` を直接実行すると permission denied になり、hook の場合は**ブロックせずに素通りする**。`validate_skill.py` が直接実行の記述を検出する。
 
 ## ツール権限
 
@@ -191,7 +193,7 @@ paths:
 
 | 機能 | Codex |
 |------|-------|
-| frontmatter の `hooks` / `context: fork` / `paths` / `model` / `effort` | 効かない |
+| frontmatter の `hooks` / `context: fork` / `paths` / `model` / `effort` | 効かない。hook 自体は Codex にもあり契約も同じなので、`.codex/hooks.json` に配線すれば同じスクリプトが動く(→ [hooks.md](hooks.md#codex-で使うとき)) |
 | `disable-model-invocation` / `allowed-tools` / `disallowed-tools` | 効かない。自動起動の抑止だけは `agents/openai.yaml` で代替できる(下記) |
 | `` !`cmd` `` の動的コンテキスト注入 | 効かない |
 | `${CLAUDE_SKILL_DIR}` などの置換変数 | 効かない |

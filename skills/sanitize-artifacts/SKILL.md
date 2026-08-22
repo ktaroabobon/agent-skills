@@ -2,7 +2,7 @@
 name: sanitize-artifacts
 description: 会話の中で作った成果物(ドキュメント・コード・コメント・PR 本文・UI 文言)から、指示の引用・採用しなかった案・制約の免責文・修正経緯といった制作過程の残滓を取り除き、読み手だけを見た自立した形に仕上げる。「成果物を整えて」「会話の痕跡を消して」「そのまま渡せる形にして」「仕上げて」「sanitize して」「メタ情報が混ざってないか見て」時に使用。内容の追加や技術的な変更はしない。修正後の成果物そのものを返し、作業報告は求められたときだけ添える。
 argument-hint: "[path ...]"
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/find_residue.sh *)
+allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/find_residue.sh *)
 license: MIT
 ---
 
@@ -25,10 +25,10 @@ license: MIT
 対象ファイルに同梱スクリプトを当て、表層パターンの当たりを付ける:
 
 ```bash
-${CLAUDE_SKILL_DIR}/scripts/find_residue.sh <path ...>
+bash ${CLAUDE_SKILL_DIR}/scripts/find_residue.sh <path ...>
 ```
 
-(Codex ではスキルディレクトリからの相対パス `scripts/find_residue.sh` で実行する)
+(Codex ではスキルディレクトリからの相対パスで `bash scripts/find_residue.sh` と実行する)
 
 スクリプトは発見の補助で、判定はしない。**当たりが 0 件でも本文を通読する。** 文章の継ぎ目、唐突な免責、読み手に関係ない前置きは grep では見つからない。
 

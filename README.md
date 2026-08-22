@@ -18,7 +18,7 @@
 | [`explain`](skills/explain/SKILL.md) | プロジェクトを read-only で調べ、目的・スタック・構成・動かし方・注意点を、事実と推測を分けて説明する |
 | [`find-skills`](skills/find-skills/SKILL.md) | 依頼に合う既存スキルを、手元 → このリポジトリ → GitHub / skills.sh の順に探し、中身を確かめてから提案する |
 | [`browser-use`](skills/browser-use/SKILL.md) | browser-use CLI で実ブラウザを操作する。upstream 公式スキルの写し(更新手順つき) |
-| [`agents-onboarding`](skills/agents-onboarding/SKILL.md) | 任意のリポジトリに AI エージェント向けの開発基盤(rules / スキル / hooks / AGENTS.md)を一式整備する |
+| [`agents-onboarding`](skills/agents-onboarding/SKILL.md) | 任意のリポジトリに AI エージェント向けの開発基盤(rules / スキル / AGENTS.md / Claude Code・Codex 両方で効く hooks)を一式整備する |
 | [`openapi-rfc-compliance`](skills/openapi-rfc-compliance/SKILL.md) | OpenAPI 定義と API 実装の RFC / デファクト準拠を 10 領域で検査し、証拠つきで報告する |
 | [`skill-creator`](skills/skill-creator/SKILL.md) | このリポジトリにスキルを作る・直す。Claude Code 機能の棚卸しと frontmatter 検証を経て公開まで導く |
 
@@ -37,7 +37,7 @@ Codex は `--agent codex`。特定リポジトリだけなら `--scope project`(
 全スキルに共通する決まり。個々の設計判断は各 SKILL.md の冒頭に書いてある。
 
 - **副作用のあるものはユーザーが打ったときだけ動く。** commit / push / PR 作成と `goal` は `disable-model-invocation: true`(Codex では `agents/openai.yaml` の `allow_implicit_invocation: false`)。自然言語で呼びたいもの(Issue 起票・レビュー投稿)は投稿前の承認ゲートを置く
-- **禁止事項は hook で止める。** AI 署名の混入、ラベルの新規作成、単発 inline comment は PreToolUse の `exit 2` でブロックする。指示文は守られないことがある
+- **禁止事項は hook で止める。** AI 署名の混入、ラベルの新規作成、単発 inline comment は PreToolUse の `exit 2` でブロックする。指示文は守られないことがある。hook の入力と exit 2 の契約は Claude Code / Codex で同じなので、スクリプトは 1 本を両方から呼ぶ
 - **判定系は書き込みツールを持たない。** `disallowed-tools: Write Edit`。証拠(`file:line`)のない指摘は出さない
 - **Claude Code 専用機能は「あれば効く上乗せ」。** Codex では本文の指示だけで成立するように書く
 - **実在しないコマンドを書かない。** 書いたコマンドは実行して確かめる
