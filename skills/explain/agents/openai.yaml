@@ -1,0 +1,6 @@
+interface:
+  display_name: "Explain"
+  short_description: "プロジェクトを調べて説明する(読むだけ)"
+  default_prompt: "Use $explain to give me an overview of this repository."
+policy:
+  allow_implicit_invocation: true
