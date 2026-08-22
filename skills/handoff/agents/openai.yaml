@@ -1,0 +1,6 @@
+interface:
+  display_name: "Handoff"
+  short_description: "別エージェントへの引き継ぎプロンプトを作る"
+  default_prompt: "Use $handoff to summarize the current task for another agent."
+policy:
+  allow_implicit_invocation: true
