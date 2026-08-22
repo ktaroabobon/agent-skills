@@ -12,6 +12,20 @@ hooks:
           if: "Bash(git commit *)"
           command: "bash ${CLAUDE_SKILL_DIR}/hooks/no-ai-attribution.sh"
           timeout: 10
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/no-destructive-git.sh"
+          timeout: 10
+    - matcher: "*"
+      hooks:
+        - type: command
+          once: true
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/record-baseline.sh"
+          timeout: 10
+  Stop:
+    - hooks:
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/stop-dirty-tree.sh"
+          timeout: 15
 license: MIT
 ---
 
@@ -30,6 +44,10 @@ license: MIT
 ## 引数
 
 - `<goal>`: 達成したい目標。曖昧なら最も妥当な解釈を採り、解釈を作業ノートに書いて進める。解釈次第で有害・不可逆な作業になるときだけ聞く
+
+## 作業ノート
+
+解釈・完了条件・次の数手・試した実験を書き留める場所。応答の中に短く書くのが既定。セッションをまたぐ見込みのある長い目標では、リポジトリ管理外のファイル(`${TMPDIR}` など)に置き、最終報告にパスを書く。**リポジトリ内には作らない** — 差分に混ざり、commit されうる。
 
 ## Step 0: 現状を把握する
 
@@ -66,6 +84,8 @@ license: MIT
 ### 2-3. 検証する
 
 もっとも関係の深い検査を先に走らせる(対象のテスト、型検査、lint、再現コマンド)。広い検査(全テスト、ビルド)は節目で。失敗は情報として扱う — 原因を診断し、直し、再度検証する。失敗を隠さない。
+
+根拠にするのは**最後の変更より後に走らせた結果**だけ。直前の編集のあとに走らせていない検査は、通ったことにせず走らせ直す。
 
 ### 2-4. 差分を見直す
 
@@ -105,7 +125,14 @@ commit の前に差分そのものを読む:
 - リポジトリが安全に進められない状態にある
 - ユーザーが作業量の上限を指示していた
 
-ブロッカーで止まるときは、作業ツリーを綺麗で再開しやすい状態にして止まる。
+### 止まるときの片付け
+
+ブロッカーで止まるときも、達成して止まるときも、作業ツリーを再開しやすい状態にしてから止まる:
+
+- 塊になっている変更は commit する。途中の変更は「チェックポイント」とメッセージに明記して commit する
+- stash は使わない(ユーザーの無関係な変更まで巻き込む)
+- 実験の残骸は消す。元からあった無関係な差分には触らない
+- 自分が作った未コミットの変更を残したまま最終回答しない(Stop hook が 1 回だけ差し戻す)
 
 ## 実験するとき
 
@@ -122,7 +149,13 @@ commit の前に差分そのものを読む:
 
 ## 強制されること(hook)
 
-`hooks/no-ai-attribution.sh` が PreToolUse で `git commit` を検査し、AI ツールの署名が含まれていたら `exit 2` でブロックする。署名の形だけを見るので、AI ツールに言及したメッセージ自体は通る。この hook は Claude Code でのみ効く。Codex では上の規約を指示として守る。
+指示だけでは守られない 3 つを hook にしてある。いずれも Claude Code でのみ効く。Codex では上の規約を指示として守る。
+
+| hook | イベント | 何をするか |
+|------|---------|-----------|
+| `hooks/no-ai-attribution.sh` | PreToolUse(`git commit`) | AI ツールの署名が含まれる commit を `exit 2` でブロックする。署名の形だけを見るので、AI ツールに言及したメッセージ自体は通る |
+| `hooks/no-destructive-git.sh` | PreToolUse(Bash) | `git reset --hard` / `git clean -f` / 作業ツリー全体の `checkout`・`restore` / force push / `stash drop`・`clear` / `branch -D` をブロックする。パスを指定した `restore` と `restore --staged .` は通る。コマンド文字列を見るので、`&&` や `;` でつないだ後続も対象 |
+| `hooks/record-baseline.sh` + `hooks/stop-dirty-tree.sh` | PreToolUse(初回のみ) + Stop | 起動時点の `git status` を控え、最終回答の前にこのセッションで作った未コミットの変更が残っていれば 1 回だけ差し戻す。元からあった差分は数えない。差し戻しはセッションに 1 回まで(無限ループにしない) |
 
 ## 完了時に返すもの
 
