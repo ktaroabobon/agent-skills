@@ -1,0 +1,6 @@
+interface:
+  display_name: "Sanitize Artifacts"
+  short_description: "成果物から会話の残滓を取り除き、読み手向けに仕上げる"
+  default_prompt: "Use $sanitize-artifacts to polish the files created in this session."
+policy:
+  allow_implicit_invocation: true
