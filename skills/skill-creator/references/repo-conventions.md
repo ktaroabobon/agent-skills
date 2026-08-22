@@ -86,13 +86,13 @@ echo '{"tool_input":{"file_path":"<通過対象>"}}'   | bash skills/<name>/hook
 
 ## README の更新
 
-ルート `README.md` の Skills 表に 1 行足す。インストール例にもコマンドを足す。
+ルート `README.md` の Skills 表に 1 行足す。**それだけ。** README は「何があるか」「どう入れるか」が 1 画面で分かる長さに保つ。
 
 ```markdown
 | [`<name>`](skills/<name>/SKILL.md) | <1 行の説明> |
 ```
 
-スキルの設計上の判断で共有する価値があるものは、README に節を設けて書く(既存 2 スキルがそうしている)。
+設計上の判断(なぜこの構造か、なぜ hook にしたか)は README ではなく **SKILL.md の冒頭**に書く。スキルを読む人が最初に見る場所であり、README に書くと一覧が埋もれる。README の「設計方針」節には全スキルに共通する原則だけを置く。
 
 ## ブランチと PR
 
