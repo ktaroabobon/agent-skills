@@ -1,0 +1,6 @@
+interface:
+  display_name: "Find Skills"
+  short_description: "依頼に合う既存スキルを探して確かめる"
+  default_prompt: "Use $find-skills to look for a skill that helps with <task>."
+policy:
+  allow_implicit_invocation: true

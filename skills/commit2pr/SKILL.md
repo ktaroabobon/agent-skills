@@ -23,7 +23,7 @@ license: MIT
 
 未コミットの変更を commit → push し、PR を作成または更新する。
 
-`disable-model-invocation: true` を付けている。PR 作成はレビュワーに通知が飛ぶ外向きの副作用なので、ユーザーが `/commit2pr` と打ったときだけ動かす。
+`disable-model-invocation: true` を付けている。PR 作成はレビュワーに通知が飛ぶ外向きの副作用なので、ユーザーが `/commit2pr` と打ったときだけ動かす。Codex 向けには `agents/openai.yaml` の `allow_implicit_invocation: false` が同じ役割をする。
 
 引数:
 

@@ -33,6 +33,7 @@ license: MIT
 4. **出力は何か** — レポート? ファイル生成? コード変更? 判定だけ?
 5. **やらないこと** — 境界を決めないと誤発火する
 6. **繰り返し発生する定型作業はあるか** — 毎回同じコードを書くなら `scripts/`、毎回同じ資料を引くなら `references/`
+7. **判断の要になる概念は何か** — 「塊」「漏れ」のように解釈で結果が変わる語があるなら、定義できるか([patterns.md](references/patterns.md) の用語定義)
 
 **既存スキルの改善なら**: 現物を読み、`validate_skill.py` を通し、直近で困った具体例を聞いてから Step 2 へ。
 
@@ -72,6 +73,7 @@ Step 1 の具体例それぞれについて「ゼロから実行するとした�
 | `references/` | 詳細資料。SKILL.md が 500 行に近づいた | | |
 | `assets/` / `templates/` | 出力に使う素材 | | |
 | `examples/` + 期待結果 | 検出漏れ・偽陽性が問題になる | | |
+| `agents/openai.yaml` | Codex の一覧に表示名・既定プロンプトを出したい / `disable-model-invocation` を Codex でも効かせたい | | |
 
 判断材料は [capabilities.md](references/capabilities.md)、hook を使うなら [hooks.md](references/hooks.md)。
 
@@ -110,6 +112,9 @@ python3 skills/skill-creator/scripts/init_skill.py <skill-name>
 - 「いつ使うか」は本文ではなく `description` に書く(本文は発火後にしか読まれない)
 - 同じ情報を SKILL.md と references の両方に書かない
 - 本文は**セッション中ずっと残る**ので、「一度きりの手順」ではなく「以後ずっと効く指示」として書く
+- 冒頭に**核となる原則を 1 つ**書く。手順で迷ったときの戻り先になる
+- 副作用があるスキルは、**「何もしない」が正解になる条件**と、**最終報告の形式**(やったこと / やらなかったことと理由 / 実行した検証)を書く
+- 成果物を出すスキルは、制約・例示・修正経緯を成果物に漏らさず、成果物を先に出す
 - スキル内に `README.md` を置かない
 
 frontmatter は [frontmatter.md](references/frontmatter.md) を見ながら書く。**`[` で始まる値は必ずクォートする。**

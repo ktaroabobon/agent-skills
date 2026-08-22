@@ -2,7 +2,7 @@
 """このリポジトリの流儀でスキルの雛形を生成する。
 
 使い方:
-    init_skill.py <skill-name> [--path skills] [--with hooks,scripts,references,examples,assets,templates] [--force]
+    init_skill.py <skill-name> [--path skills] [--with hooks,scripts,references,examples,assets,templates,agents] [--force]
 
 --with で指定した同梱リソースは、**動く形で** frontmatter に配線された状態で生成される
 (hooks なら実際にブロックするスクリプト + frontmatter の hooks ブロック)。
@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-KINDS = ("hooks", "scripts", "references", "examples", "assets", "templates")
+KINDS = ("hooks", "scripts", "references", "examples", "assets", "templates", "agents")
 
 
 def skill_md(name: str, kinds: set[str]) -> str:
@@ -41,7 +41,16 @@ def skill_md(name: str, kinds: set[str]) -> str:
         ]
     fm += ["license: MIT", "---", ""]
 
-    body = [f"# {name}", "", "TODO(このスキルが何をするかを 1〜2 文で。境界=やらないことも書く)", ""]
+    body = [
+        f"# {name}",
+        "",
+        "TODO(このスキルが何をするかを 1〜2 文で。境界=やらないことも書く)",
+        "",
+        "## 原則",
+        "",
+        "TODO(判断をすべて決める原則を 1 つ。手順で迷ったらここに戻る。副作用があるなら「何もしない」が正解になる条件も)",
+        "",
+    ]
 
     refs = []
     if "references" in kinds:
@@ -90,6 +99,12 @@ def skill_md(name: str, kinds: set[str]) -> str:
         ]
 
     body += [
+        "## 完了時に返すもの",
+        "",
+        "- やったこと(TODO: 作成したコミット / 変更したファイル / 出したレポート)",
+        "- やらなかったことと理由(0 件ならその事実と理由)",
+        "- 実行した検証コマンドと結果。実行していないならその旨",
+        "",
         "## 検証",
         "",
         "- [ ] `python3 skills/skill-creator/scripts/validate_skill.py skills/" + name + "` が 0 error",
@@ -180,6 +195,16 @@ fixture には**検出箇所を示すヒントコメントを置かない**。�
 | TODO | TODO | TODO |
 """
 
+OPENAI_YAML = """interface:
+  display_name: "{title}"
+  short_description: "TODO(UI に出る一言)"
+  default_prompt: "Use ${name} to TODO."
+policy:
+  allow_implicit_invocation: true
+"""
+# Codex が読む UI メタデータ。副作用のあるスキルは allow_implicit_invocation を false にする
+# (Claude Code の disable-model-invocation: true に相当。frontmatter は Codex で無視される)。
+
 FILES = {
     "hooks": [("hooks/guard.sh", GUARD_SH, True)],
     "scripts": [("scripts/run.sh", RUN_SH, True)],
@@ -187,6 +212,7 @@ FILES = {
     "examples": [("examples/expected.md", EXPECTED_MD, False), ("examples/fixture/.gitkeep", "", False)],
     "assets": [("assets/.gitkeep", "", False)],
     "templates": [("templates/.gitkeep", "", False)],
+    "agents": [("agents/openai.yaml", OPENAI_YAML, False)],
 }
 
 
@@ -219,6 +245,8 @@ def main() -> int:
         for rel, content, executable in FILES[kind]:
             path = root / rel
             path.parent.mkdir(parents=True, exist_ok=True)
+            if kind == "agents":
+                content = content.format(name=args.name, title=args.name.replace("-", " ").title())
             path.write_text(content, encoding="utf-8")
             if executable:
                 path.chmod(0o755)
@@ -234,6 +262,8 @@ def main() -> int:
     if "hooks" in kinds:
         print(f"     echo '{{\"tool_input\":{{\"file_path\":\"x.gen.ts\"}}}}' | bash {root}/hooks/guard.sh; echo $?  # → 2")
         print(f"     echo '{{\"tool_input\":{{\"file_path\":\"src/a.ts\"}}}}' | bash {root}/hooks/guard.sh; echo $?  # → 0")
+    if "agents" in kinds:
+        print("     agents/openai.yaml: 副作用があるなら policy.allow_implicit_invocation を false にする")
     print(f"  3. python3 skills/skill-creator/scripts/validate_skill.py {root}")
     print("  4. gh skill publish --dry-run")
     print("  5. ルート README.md の Skills 表に 1 行追加")

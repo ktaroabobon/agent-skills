@@ -18,7 +18,7 @@ license: MIT
 
 未コミットの変更を commit し、現在のブランチを remote に push する。**PR は作らない** — PR まで進めたいときは `commit2pr`。
 
-`disable-model-invocation: true` を付けている。push は他人から見える副作用なので、ユーザーが `/commit2push` と打ったときだけ動かす。
+`disable-model-invocation: true` を付けている。push は他人から見える副作用なので、ユーザーが `/commit2push` と打ったときだけ動かす。Codex 向けには `agents/openai.yaml` の `allow_implicit_invocation: false` が同じ役割をする。
 
 commit フェーズの手順は `commit` スキルと同じものを持たせている。3 スキルは個別にインストールできるようにしてあり、片方だけ入れても動く必要があるため。
 

@@ -192,9 +192,30 @@ paths:
 | 機能 | Codex |
 |------|-------|
 | frontmatter の `hooks` / `context: fork` / `paths` / `model` / `effort` | 効かない |
+| `disable-model-invocation` / `allowed-tools` / `disallowed-tools` | 効かない。自動起動の抑止だけは `agents/openai.yaml` で代替できる(下記) |
 | `` !`cmd` `` の動的コンテキスト注入 | 効かない |
 | `${CLAUDE_SKILL_DIR}` などの置換変数 | 効かない |
 | 並列サブエージェント | 使えない前提で書く |
 | SKILL.md 本文・`references/` / `scripts/` / `assets/` | 効く |
 
 **両対応を謳うなら、Claude Code 専用機能は「あれば効く上乗せ」にとどめ、本文だけでも成立するように書く。** 並列ディスパッチには必ず逐次フォールバックの手順を併記する。どちらか一方に振り切るなら、SKILL.md に対象環境を明記する。
+
+### Codex だけが読む `agents/openai.yaml`
+
+スキルディレクトリに `agents/openai.yaml` を置くと、Codex の UI(スキル一覧・チップ)に表示名・説明・既定プロンプトが出る。**エージェントではなくハーネスが読む**ファイルで、Claude Code は無視する。
+
+```yaml
+interface:
+  display_name: "Commit"
+  short_description: "意味のある塊ごとに commit する"
+  default_prompt: "Use $commit to commit the current changes."
+policy:
+  allow_implicit_invocation: true
+```
+
+- `interface.default_prompt` には `$<skill-name>` を含める(Codex の呼び出し構文)
+- `policy.allow_implicit_invocation: false` で、スキルが既定でモデルのコンテキストに載らなくなり、ユーザーの `$name` 明示呼び出しだけになる。**Claude Code の `disable-model-invocation: true` に相当する。** 副作用のあるスキルは両方を付ける(frontmatter は Codex で無視され、openai.yaml は Claude Code で無視されるため、片方だけでは半分しか守れない)
+- `icon_small` / `icon_large` / `brand_color` / `dependencies.tools`(MCP)もある。全項目は Codex 同梱の `~/.codex/skills/.system/skill-creator/references/openai_yaml.md` を見る
+- 値は全部クォートする(`"..."`)。キーはクォートしない
+
+`init_skill.py <name> --with agents` で雛形が出る。`validate_skill.py` は YAML パース、`default_prompt` の `$name` 欠落、`disable-model-invocation: true` なのに `allow_implicit_invocation` が `false` でない組み合わせを検出する。

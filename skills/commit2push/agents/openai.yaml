@@ -1,0 +1,6 @@
+interface:
+  display_name: "Commit and Push"
+  short_description: "塊ごとに commit して push し、CI の結果まで見届ける"
+  default_prompt: "Use $commit2push to commit the current changes and push them."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Commit and Create PR"
+  short_description: "commit → push → PR 作成/更新まで行う"
+  default_prompt: "Use $commit2pr to commit the current changes, push them, and open a pull request."
+policy:
+  allow_implicit_invocation: false

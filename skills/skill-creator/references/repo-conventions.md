@@ -19,7 +19,8 @@ skills/<skill-name>/
 ├── scripts/          # 任意: 実行するコード
 ├── assets/           # 任意: 出力に使う素材
 ├── templates/        # 任意: 生成先リポジトリに展開する雛形(agents-onboarding 方式)
-└── examples/         # 任意: 自己テスト用の fixture
+├── examples/         # 任意: 自己テスト用の fixture
+└── agents/openai.yaml  # 任意: Codex の UI メタデータと自動起動の抑止(→ capabilities.md)
 ```
 
 - ディレクトリ名 = `name` frontmatter = 起動コマンド。**3 つを一致させる**(`validate_skill.py` が検査する)
@@ -52,6 +53,12 @@ skills/<skill-name>/
 4. **検査定義を SKILL.md に埋め込まない。** 担当分だけを読ませる
 5. **参照した外部仕様は動く。** 最終確認日と更新確認の手順を残す
 
+行動系スキル(`commit` / `create-issue` / `pr-request-changes`):
+
+1. **副作用のあるものはユーザーが打ったときだけ動く**(`disable-model-invocation: true`)か、投稿前の承認ゲートを置く
+2. **「何もしない」を正当な結果にする。** 塊になっていなければ 0 コミット。証拠が無ければ指摘しない
+3. **最終報告に「やらなかったことと理由」を含める**(→ [patterns.md](patterns.md))
+
 新しいスキルもこの流儀に合わせる。合わせない場合は SKILL.md にその理由を書く。
 
 ## 検証
@@ -79,13 +86,13 @@ echo '{"tool_input":{"file_path":"<通過対象>"}}'   | bash skills/<name>/hook
 
 ## README の更新
 
-ルート `README.md` の Skills 表に 1 行足す。インストール例にもコマンドを足す。
+ルート `README.md` の Skills 表に 1 行足す。**それだけ。** README は「何があるか」「どう入れるか」が 1 画面で分かる長さに保つ。
 
 ```markdown
 | [`<name>`](skills/<name>/SKILL.md) | <1 行の説明> |
 ```
 
-スキルの設計上の判断で共有する価値があるものは、README に節を設けて書く(既存 2 スキルがそうしている)。
+設計上の判断(なぜこの構造か、なぜ hook にしたか)は README ではなく **SKILL.md の冒頭**に書く。スキルを読む人が最初に見る場所であり、README に書くと一覧が埋もれる。README の「設計方針」節には全スキルに共通する原則だけを置く。
 
 ## ブランチと PR
 

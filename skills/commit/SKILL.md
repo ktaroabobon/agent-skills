@@ -18,7 +18,7 @@ license: MIT
 
 未コミットの変更を commit する。**commit 以外はしない** — push もタグ付けも PR 作成もしない。境界を守るのは、`/commit` が「まだ外に出したくない」段階で使われるコマンドだから。
 
-`disable-model-invocation: true` を付けている。commit は取り消しに手間がかかる副作用なので、ユーザーが `/commit` と打ったときだけ動かす。
+`disable-model-invocation: true` を付けている。commit は取り消しに手間がかかる副作用なので、ユーザーが `/commit` と打ったときだけ動かす。Codex 向けには `agents/openai.yaml` の `allow_implicit_invocation: false` が同じ役割をする。
 
 ## Step 1: 変更を塊に分ける
 
