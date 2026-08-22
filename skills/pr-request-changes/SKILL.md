@@ -9,7 +9,7 @@ hooks:
       hooks:
         - type: command
           if: "Bash(gh api *)"
-          command: "${CLAUDE_SKILL_DIR}/hooks/no-single-comment.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/no-single-comment.sh"
           timeout: 10
 license: MIT
 ---

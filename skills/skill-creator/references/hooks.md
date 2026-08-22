@@ -48,13 +48,13 @@ hooks:
       hooks:
         - type: command
           if: "Bash(rm *)"
-          command: "${CLAUDE_SKILL_DIR}/hooks/block-destructive.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/block-destructive.sh"
           timeout: 10
   PostToolUse:
     - matcher: "Edit|Write"
       hooks:
         - type: command
-          command: "${CLAUDE_SKILL_DIR}/hooks/format-and-check.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/format-and-check.sh"
 ---
 ```
 

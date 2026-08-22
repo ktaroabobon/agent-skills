@@ -10,11 +10,11 @@ hooks:
       hooks:
         - type: command
           if: "Bash(git commit *)"
-          command: "${CLAUDE_SKILL_DIR}/hooks/no-ai-attribution.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/no-ai-attribution.sh"
           timeout: 10
         - type: command
           if: "Bash(gh pr *)"
-          command: "${CLAUDE_SKILL_DIR}/hooks/no-ai-attribution.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/no-ai-attribution.sh"
           timeout: 10
 license: MIT
 ---

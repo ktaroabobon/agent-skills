@@ -9,7 +9,7 @@ hooks:
       hooks:
         - type: command
           if: "Bash(gh *)"
-          command: "${CLAUDE_SKILL_DIR}/hooks/no-new-label.sh"
+          command: "bash ${CLAUDE_SKILL_DIR}/hooks/no-new-label.sh"
           timeout: 10
 license: MIT
 ---

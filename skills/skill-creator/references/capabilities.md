@@ -76,10 +76,12 @@ npm --version
 ---
 name: render-chart
 description: ...
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/render.sh *)
+allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/render.sh *)
 ---
-`${CLAUDE_SKILL_DIR}/scripts/render.sh <input> <output>` を実行する。
+`bash ${CLAUDE_SKILL_DIR}/scripts/render.sh <input> <output>` を実行する。
 ```
+
+**同梱スクリプトと hook は必ず `bash` / `python3` 経由で起動する。** `gh skill install` はファイルの実行権限を保存しない(git では 100755 でも、インストール先では 644 になる。2026-08 実測)。`${CLAUDE_SKILL_DIR}/scripts/x.sh` を直接実行すると permission denied になり、hook の場合は**ブロックせずに素通りする**。`validate_skill.py` が直接実行の記述を検出する。
 
 ## ツール権限
 

@@ -210,7 +210,24 @@ def check_hooks(rep: Report, skill_md: Path, hooks) -> None:
                     rep.error(f"{skill_md.name} {loc} に `server` / `tool` が無い")
 
 
+DIRECT_EXEC_RE = re.compile(r"\$\{CLAUDE_SKILL_DIR\}/[^\s\"'`)]+\.(?:sh|py)\b")
+INTERPRETER_RE = re.compile(r"(?:^|[\s(\"'`])(?:bash|sh|zsh|python3?|node)\s+\"?$")
+
+
+def check_direct_exec(rep: Report, skill_md: Path, text: str) -> None:
+    """gh skill install は実行権限を保存しないので、同梱スクリプトは bash / python3 経由で起動させる。"""
+    for i, line in enumerate(text.split("\n"), 1):
+        for m in DIRECT_EXEC_RE.finditer(line):
+            before = line[: m.start()]
+            if not INTERPRETER_RE.search(before):
+                rep.warn(
+                    f"{skill_md.name}:{i} `{m.group(0)}` を直接実行している。"
+                    "gh skill install は実行権限を落とすので `bash` / `python3` 経由で起動する"
+                )
+
+
 def check_body(rep: Report, skill_md: Path, text: str, body_start: int) -> None:
+    check_direct_exec(rep, skill_md, text)
     body_lines = text.count("\n") - body_start + 1
     if body_lines > BODY_LINE_SOFT_LIMIT:
         rep.warn(
