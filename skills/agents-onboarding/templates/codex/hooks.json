@@ -1,0 +1,29 @@
+{
+  "description": "Codex 向けの hook 配線。.claude/settings.json と同じスクリプトを .agents/hooks/ から呼ぶ。",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.agents/hooks/protect-generated-files.sh\"",
+            "timeout": 10,
+            "statusMessage": "生成物・secrets への書き込みを検査"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.agents/hooks/guard-commands.sh\"",
+            "timeout": 10,
+            "statusMessage": "破壊的なコマンドを検査"
+          }
+        ]
+      }
+    ]
+  }
+}
