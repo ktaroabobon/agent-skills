@@ -1,0 +1,6 @@
+interface:
+  display_name: "Browser Use"
+  short_description: "browser-use CLI で実ブラウザを操作する"
+  default_prompt: "Use $browser-use to open <url> and complete the task in the browser."
+policy:
+  allow_implicit_invocation: true
