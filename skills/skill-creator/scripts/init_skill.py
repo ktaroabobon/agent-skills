@@ -41,7 +41,16 @@ def skill_md(name: str, kinds: set[str]) -> str:
         ]
     fm += ["license: MIT", "---", ""]
 
-    body = [f"# {name}", "", "TODO(このスキルが何をするかを 1〜2 文で。境界=やらないことも書く)", ""]
+    body = [
+        f"# {name}",
+        "",
+        "TODO(このスキルが何をするかを 1〜2 文で。境界=やらないことも書く)",
+        "",
+        "## 原則",
+        "",
+        "TODO(判断をすべて決める原則を 1 つ。手順で迷ったらここに戻る。副作用があるなら「何もしない」が正解になる条件も)",
+        "",
+    ]
 
     refs = []
     if "references" in kinds:
@@ -90,6 +99,12 @@ def skill_md(name: str, kinds: set[str]) -> str:
         ]
 
     body += [
+        "## 完了時に返すもの",
+        "",
+        "- やったこと(TODO: 作成したコミット / 変更したファイル / 出したレポート)",
+        "- やらなかったことと理由(0 件ならその事実と理由)",
+        "- 実行した検証コマンドと結果。実行していないならその旨",
+        "",
         "## 検証",
         "",
         "- [ ] `python3 skills/skill-creator/scripts/validate_skill.py skills/" + name + "` が 0 error",
