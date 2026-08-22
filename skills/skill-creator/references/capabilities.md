@@ -191,7 +191,7 @@ paths:
 
 | 機能 | Codex |
 |------|-------|
-| frontmatter の `hooks` / `context: fork` / `paths` / `model` / `effort` | 効かない |
+| frontmatter の `hooks` / `context: fork` / `paths` / `model` / `effort` | 効かない。hook 自体は Codex にもあり契約も同じなので、`.codex/hooks.json` に配線すれば同じスクリプトが動く(→ [hooks.md](hooks.md#codex-で使うとき)) |
 | `disable-model-invocation` / `allowed-tools` / `disallowed-tools` | 効かない。自動起動の抑止だけは `agents/openai.yaml` で代替できる(下記) |
 | `` !`cmd` `` の動的コンテキスト注入 | 効かない |
 | `${CLAUDE_SKILL_DIR}` などの置換変数 | 効かない |
