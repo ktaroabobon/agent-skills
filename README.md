@@ -9,7 +9,7 @@
 | [`commit`](skills/commit/SKILL.md) | チェックコマンドを通してから、意味のある塊ごとに日本語メッセージで commit する。push も PR 作成もしない |
 | [`commit2push`](skills/commit2push/SKILL.md) | commit → push し、リモート CI の結果まで見届ける |
 | [`commit2pr`](skills/commit2pr/SKILL.md) | commit → push → PR 作成/更新。PR テンプレートに従って日本語で本文を書く |
-| [`goal`](skills/goal/SKILL.md) | 広い目標を、小目標 → 実装 → 検証 → commit → 再計画のサイクルで、達成して検証するまで自律的に回す |
+| [`goal`](skills/goal/SKILL.md) | 広い目標を、小目標 → 実装 → 検証 → commit → 再計画のサイクルで、達成して検証するまで自律的に回す。破壊的 git 操作と AI 署名は hook で止め、自分の未コミット変更を残したまま止まらない |
 | [`create-issue`](skills/create-issue/SKILL.md) | 課題・原因・解決策・作業ブランチを構造化した Issue を起票する。ラベルは既存から選ぶ |
 | [`pr-request-changes`](skills/pr-request-changes/SKILL.md) | 複数の修正指摘を `path:line` に配置し、1 つの REQUEST_CHANGES review として投稿する |
 | [`rules-review`](skills/rules-review/SKILL.md) | 差分をリポジトリの rules に照らし、違反だけを重大度つきで検出する。基準を自動探索するのでオンボーディング前でも動く |
