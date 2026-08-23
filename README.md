@@ -27,10 +27,14 @@
 ## インストール
 
 ```bash
+# 全部入れる
+gh skill install ktaroabobon/agent-skills --all --agent claude-code --scope user
+
+# 1 つだけ入れる
 gh skill install ktaroabobon/agent-skills <name> --agent claude-code --scope user
 ```
 
-Codex は `--agent codex`。特定リポジトリだけなら `--scope project`(既定)。更新は `gh skill update --all`。
+Codex は `--agent codex`。特定リポジトリだけなら `--scope project`(既定)。同名のスキルが既にあるなら `--force` で上書き。更新は `gh skill update --all`。
 
 ## 設計方針
 
