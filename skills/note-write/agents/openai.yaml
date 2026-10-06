@@ -1,0 +1,6 @@
+interface:
+  display_name: "Note Write"
+  short_description: "メモ帳にノートを書く・直す(読み手に合わせて粒度を変える)"
+  default_prompt: "Use $note-write to save what we found in this session as a note."
+policy:
+  allow_implicit_invocation: true
