@@ -15,6 +15,7 @@
 | [`rules-review`](skills/rules-review/SKILL.md) | 差分をリポジトリの rules に照らし、違反だけを重大度つきで検出する。基準を自動探索するのでオンボーディング前でも動く |
 | [`sanitize-artifacts`](skills/sanitize-artifacts/SKILL.md) | 成果物から、指示の引用・採用しなかった案・免責文・修正経緯といった制作過程の残滓を取り除く |
 | [`handoff`](skills/handoff/SKILL.md) | 会話とタスクの状態を、別エージェント / 新しいチャット向けの引き継ぎプロンプトにまとめる |
+| [`note-write`](skills/note-write/SKILL.md) | 個人のメモ帳にノートを書く・直す。最初に読み手を聞いて粒度・目次・文体を切り替え、既存の構成から置き場所とファイル名を決める |
 | [`explain`](skills/explain/SKILL.md) | プロジェクトを read-only で調べ、目的・スタック・構成・動かし方・注意点を、事実と推測を分けて説明する |
 | [`find-skills`](skills/find-skills/SKILL.md) | 依頼に合う既存スキルを、手元 → このリポジトリ → GitHub / skills.sh の順に探し、中身を確かめてから提案する |
 | [`browser-use`](skills/browser-use/SKILL.md) | browser-use CLI で実ブラウザを操作する。upstream 公式スキルの写し(更新手順つき) |
