@@ -1,0 +1,6 @@
+{
+  "name": "delegate-sessions",
+  "version": "0.1.0",
+  "description": "Lean toward handing self-contained work to child sessions, and pick each child's model and effort from the work itself",
+  "author": { "name": "ktaroabobon" }
+}

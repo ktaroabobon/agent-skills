@@ -1,0 +1,13 @@
+{
+  "name": "ktaroabobon-agent-skills",
+  "owner": {
+    "name": "ktaroabobon"
+  },
+  "description": "ktaroabobon の Claude Code mod 置き場",
+  "plugins": [
+    {
+      "name": "delegate-sessions",
+      "source": "./mods/delegate-sessions"
+    }
+  ]
+}

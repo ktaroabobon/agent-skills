@@ -25,6 +25,20 @@
 
 `commit` / `commit2push` / `commit2pr` はそれぞれ単独で動く。
 
+## Mods
+
+Claude Code の mod ( hooks module で振る舞いを変えるプラグイン ) 。スキルとは別に `mods/` に置き、[`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) で配布する。
+
+| mod | 内容 |
+|-----|------|
+| [`delegate-sessions`](mods/delegate-sessions/hooks/register.ts) | 独立した作業を子セッションへ渡す側に判断を倒し、子セッションのモデルとエフォートを作業の性質から選ばせる。system prompt に方針を 1 節足すだけで、回数や閾値は持たない。`/delegate on` / `off` で切り替える。デスクトップアプリ ( `start_session` がある環境 ) でだけ効く |
+
+```text
+/plugin install delegate-sessions --marketplace ktaroabobon/agent-skills
+```
+
+シェルからは `claude plugin install delegate-sessions --marketplace ktaroabobon/agent-skills`。
+
 ## インストール
 
 ```bash
@@ -54,5 +68,7 @@ python3 skills/skill-creator/scripts/validate_skill.py skills/*/   # frontmatter
 gh skill publish --dry-run                                          # 全スキルを spec で検証
 gh skill publish --tag vX.Y.Z                                       # リリース
 ```
+
+mod は `claude plugin validate mods/<name>` と `claude plugin test mods/<name>` で確かめる。
 
 1 つでも frontmatter が壊れていると全体が publish 不能になる。スキルの追加・改善は `skill-creator` に従う。
